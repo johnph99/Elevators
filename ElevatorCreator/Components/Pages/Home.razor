@@ -1,0 +1,125 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@using MudBlazor.Interfaces
+@using SwitchBoard
+@using SwitchBoard.Objects
+@using ElevatorCreator.Managers
+@using MudBlazor
+
+<MudPopoverProvider />
+
+<PageTitle>Home</PageTitle>
+<MudTextField Value="@Running"></MudTextField>
+
+@if (!Running)
+{
+    <button class="btn btn-primary" @onclick="StartAll">Start</button>
+}
+
+    <MudText>Elevators: @elivators.Count</MudText>
+    <MudTable Items="@elivators">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Floor</MudTh>
+            <MudTh>Load</MudTh>
+            <MudTh>Status</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.Name</MudTd>
+            <MudTd DataLabel="Sign">@context.Floor</MudTd>
+            <MudTd DataLabel="Name">@context.Load</MudTd>
+            <MudTd DataLabel="Position">@context.Status.ToString()</MudTd>
+        </RowTemplate>
+  
+    </MudTable>
+
+@if (Running)
+{
+    <MudItem>
+        <MudSelect T="Int32"  @bind-Value="newLoadType" Label="Type">
+            <MudSelectItem Value="0" >Standard</MudSelectItem>
+            <MudSelectItem Value="1">Glass</MudSelectItem>
+            <MudSelectItem Value="2">Service</MudSelectItem>
+        </MudSelect>
+
+        <MudTextField @bind-Value="newLoad.FloorNumber" Label="From Floor"></MudTextField>
+    <MudTextField @bind-Value="newLoad.DestinationFloor" Label="To Floor"></MudTextField>
+    <MudTextField @bind-Value="newLoad.Load" Label="Load"></MudTextField>
+
+    <MudButton OnClick="CallElivator">Call Elivator</MudButton>
+    </MudItem>
+}
+
+@code{
+    private List<Elevator> elivators = new();
+
+    private int BaseMentFloors = 0;
+    private int TopFloor = 5;
+
+    private WaitingLoad newLoad = new();
+    private int newLoadType = 0;
+
+    private Control _switchBoard;
+
+    private bool Running = false;
+    private async void StartAll()
+    {
+        Running = true;
+        InvokeAsync(StateHasChanged);
+        //StateHasChanged();
+
+        _switchBoard = new Control();
+
+        _switchBoard.ElevatorMoved += SwitchBoard_ElevatorMoved;
+
+        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Service));
+        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Glass));
+        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Glass));
+        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Standard));
+        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Standard));
+
+        if (BaseMentFloors < 0)
+            BaseMentFloors -= Math.Abs(BaseMentFloors);
+
+        _switchBoard.Start(TopFloor, BaseMentFloors);
+
+        _switchBoard.CallElevators(enElivatorType.Glass, 0, 4, 4);
+        _switchBoard.CallElevators(enElivatorType.Standard, 2, 3, 6);
+
+        var remainging = _switchBoard.CallElevators(enElivatorType.Standard, 3, 0, 11);
+
+        _switchBoard.CallElevators(enElivatorType.Glass, 0, 5, 5);
+        _switchBoard.CallElevators(enElivatorType.Service, 0, 4, 14);
+        _switchBoard.CallElevators(enElivatorType.Standard, 1, 5, 2);
+
+        InvokeAsync(StateHasChanged);
+        //StateHasChanged();
+
+
+    }
+
+    private void CallElivator()
+    {
+        enElivatorType evt = enElivatorType.Standard;
+        if (newLoadType == 1)
+            evt = enElivatorType.Glass;
+        else if (newLoadType == 2)
+            evt = enElivatorType.Service;
+
+        _switchBoard.CallElevators(evt, newLoad.FloorNumber, newLoad.DestinationFloor, newLoad.Load);
+    }
+    void SwitchBoard_ElevatorMoved(Object sender, ElevatorEventArgs e)
+    {
+        //update the page
+        //e.Elevator
+        // var currentEleivator = elivators.First(a => a.Name == e.Elevator.Name);
+        // currentEleivator.Status = e.Elevator.Status;
+        // currentEleivator.Floor = e.Elevator.Floor;
+        // currentEleivator.Load = e.Elevator.Load;
+        ;
+        InvokeAsync(StateHasChanged);
+       // StateHasChanged();
+
+    }
+}
