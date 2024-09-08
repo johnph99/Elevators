@@ -2,8 +2,8 @@
 @rendermode InteractiveServer
 
 @using MudBlazor.Interfaces
-@using SwitchBoard
-@using SwitchBoard.Objects
+@using Machine
+@using Machine.Objects
 @using ElevatorCreator.Managers
 @using MudBlazor
 
@@ -17,23 +17,51 @@
     <button class="btn btn-primary" @onclick="StartAll">Start</button>
 }
 
-    <MudText>Elevators: @elivators.Count</MudText>
-    <MudTable Items="@elivators">
+@if (_switchBoard != null)
+{
+    <MudText>Elevators: @_switchBoard.Elevators.Count</MudText>
+    <MudTable Items="@_switchBoard.Elevators">
         <HeaderContent>
             <MudTh>Name</MudTh>
+            <MudTh>Capacity</MudTh>
             <MudTh>Floor</MudTh>
             <MudTh>Load</MudTh>
             <MudTh>Status</MudTh>
+            <MudTh>Total Load</MudTh>
+            <MudTh>Destination Floor</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Nr">@context.Name</MudTd>
-            <MudTd DataLabel="Sign">@context.Floor</MudTd>
-            <MudTd DataLabel="Name">@context.Load</MudTd>
-            <MudTd DataLabel="Position">@context.Status.ToString()</MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Capacity">@context.Capacity</MudTd>
+            <MudTd DataLabel="Floor">@context.Floor</MudTd>
+            <MudTd DataLabel="Load">@context.Load</MudTd>
+            <MudTd DataLabel="Status">@context.Status.ToString()</MudTd>
+            <MudTd DataLabel="Load">@context.Loads.FirstOrDefault()?.Load</MudTd>
+            <MudTd DataLabel="DestinationFloor">@context.Loads.FirstOrDefault()?.DestinationFloor</MudTd>
         </RowTemplate>
   
     </MudTable>
 
+    <MudText>Que: @_switchBoard.WaitQue.Count</MudText>
+    <MudTable Items="@_switchBoard.WaitQue">
+        <HeaderContent>
+            <MudTh>Type</MudTh>
+            <MudTh>From Floor</MudTh>
+            <MudTh>To Floor</MudTh>
+            <MudTh>Load</MudTh>
+            <MudTh>Directrion</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Type">@context.Type.ToString()</MudTd>
+            <MudTd DataLabel="Floor">@context.FloorNumber</MudTd>
+            <MudTd DataLabel="DestinationFloor">@context.DestinationFloor</MudTd>
+            <MudTd DataLabel="Load">@context.Load</MudTd>
+            <MudTd DataLabel="Direction">@context.Direction.ToString()</MudTd>
+        </RowTemplate>
+
+    </MudTable>
+
+}
 @if (Running)
 {
     <MudItem>
@@ -52,7 +80,6 @@
 }
 
 @code{
-    private List<Elevator> elivators = new();
 
     private int BaseMentFloors = 0;
     private int TopFloor = 5;
@@ -60,7 +87,7 @@
     private WaitingLoad newLoad = new();
     private int newLoadType = 0;
 
-    private Control _switchBoard;
+    private Central _switchBoard;
 
     private bool Running = false;
     private async void StartAll()
@@ -69,29 +96,29 @@
         InvokeAsync(StateHasChanged);
         //StateHasChanged();
 
-        _switchBoard = new Control();
+        _switchBoard = new Central();
 
         _switchBoard.ElevatorMoved += SwitchBoard_ElevatorMoved;
 
-        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Service));
-        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Glass));
-        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Glass));
-        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Standard));
-        elivators.Add(_switchBoard.AddAlivator(enElivatorType.Standard));
+        //  _switchBoard.AddAlivator(enElivatorType.Service);
+        // _switchBoard.AddAlivator(enElivatorType.Glass);
+        // _switchBoard.AddAlivator(enElivatorType.Glass);
+         _switchBoard.AddAlivator(enElivatorType.Standard);
+         //_switchBoard.AddAlivator(enElivatorType.Standard);
 
         if (BaseMentFloors < 0)
             BaseMentFloors -= Math.Abs(BaseMentFloors);
 
         _switchBoard.Start(TopFloor, BaseMentFloors);
 
-        _switchBoard.CallElevators(enElivatorType.Glass, 0, 4, 4);
-        _switchBoard.CallElevators(enElivatorType.Standard, 2, 3, 6);
+        // _switchBoard.RequestElevator(enElivatorType.Glass, 1, 4, 4);
+        //_switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
 
-        var remainging = _switchBoard.CallElevators(enElivatorType.Standard, 3, 0, 11);
+        _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
 
-        _switchBoard.CallElevators(enElivatorType.Glass, 0, 5, 5);
-        _switchBoard.CallElevators(enElivatorType.Service, 0, 4, 14);
-        _switchBoard.CallElevators(enElivatorType.Standard, 1, 5, 2);
+        // _switchBoard.RequestElevator(enElivatorType.Glass, 0, 5, 5);
+        // _switchBoard.RequestElevator(enElivatorType.Service, 0, 4, 14);
+        _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
 
         InvokeAsync(StateHasChanged);
         //StateHasChanged();
@@ -107,7 +134,7 @@
         else if (newLoadType == 2)
             evt = enElivatorType.Service;
 
-        _switchBoard.CallElevators(evt, newLoad.FloorNumber, newLoad.DestinationFloor, newLoad.Load);
+        _switchBoard.RequestElevator(evt, newLoad.FloorNumber, newLoad.DestinationFloor, newLoad.Load);
     }
     void SwitchBoard_ElevatorMoved(Object sender, ElevatorEventArgs e)
     {

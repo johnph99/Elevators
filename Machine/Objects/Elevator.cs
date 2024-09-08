@@ -26,6 +26,7 @@ namespace Machine.Objects
         /// <summary>
         /// Contains a list of floors the elevator should stop at
         /// </summary>
-        public List<StopFloor> StopFloors { get; } = new();
+        public List<ElevatorLoad> Loads { get; } = new();
+        public int nextStop { get; set; }
     }
 }

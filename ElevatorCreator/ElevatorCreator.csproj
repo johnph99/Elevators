@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Machine\Machine.csproj" />
     <ProjectReference Include="..\SwitchBoard\SwitchBoard.csproj" />
   </ItemGroup>
 

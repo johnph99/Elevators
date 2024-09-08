@@ -12,7 +12,7 @@ namespace Machine.Objects
         public int Load{get;set;}
         public int DestinationFloor{get;set;}
         public enElivatorType Type { get; set; }
-
+        public bool Qued { get; set; }
 
         public enStatus Direction
         {
