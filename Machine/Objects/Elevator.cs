@@ -78,16 +78,19 @@ namespace Machine.Objects
         {
             if (Direction == enStatus.Idle)
             {
-                var thisType = this.GetType().ToString();
+                var elType = this.GetType().ToString();
 
-                if (waitingLoads.Where(a=>thisType.Contains(a.Type.ToString())).Any())
+                if (waitingLoads.Any())
                 {
                     //move the elevator to the first item
-                    var firstWaiting = waitingLoads.First();
-                    if (Floor > firstWaiting.FloorNumber)
-                        Direction = enStatus.MovingDown;
-                    else if (Floor < firstWaiting.FloorNumber)
-                        Direction = enStatus.MovingUp;
+                    var firstWaiting = waitingLoads.OrderBy(a => a.Distance(Floor)).FirstOrDefault(a => elType.Contains(a.Type.ToString()));
+                    if (firstWaiting != null)
+                    {
+                        if (Floor > firstWaiting.FloorNumber)
+                            Direction = enStatus.MovingDown;
+                        else if (Floor < firstWaiting.FloorNumber)
+                            Direction = enStatus.MovingUp;
+                    }
                 }
 
             }
@@ -136,7 +139,7 @@ namespace Machine.Objects
             //now load
             foreach (WaitingLoad waiting in waitingLoads.ToList())
             {
-                //if (Direction == enStatus.Idle || Direction == waiting.Direction)
+                if(thisType.Contains(waiting.Type.ToString()))
                 {
                     if (thisType.Contains(waiting.Type.ToString()) && waiting.FloorNumber == Floor && (Direction == enStatus.Idle || Direction == waiting.Direction || !Loads.Any()) )
                     {
@@ -154,7 +157,7 @@ namespace Machine.Objects
                             //raise event
                             args.TimeReached = DateTime.Now;
                             OnMoveMentEvent(args);
-                            await Task.Delay(100);
+                            //await Task.Delay(100);
                         }
                         Direction = waiting.Direction;
 

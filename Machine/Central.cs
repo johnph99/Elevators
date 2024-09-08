@@ -43,6 +43,9 @@ namespace Machine
             //move elevators
             foreach (var elevator in _elevators)
             {
+                //var elType = elevator.GetType().ToString();
+
+                //var que = WaitQue.Where(a => elType.Contains(a.Type.ToString())).ToList();
                 elevator.FindNextLoad(WaitQue);
                 elevator.Move();
                 elevator.LoadUnload(WaitQue);

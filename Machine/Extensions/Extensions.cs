@@ -9,7 +9,7 @@ namespace Machine.Extensions
             return Math.Abs(elevator.Floor - FromFloor);
         }
 
-        public static double Distance(this WaitingLoad load, int ToFloor)
+        public static double Distance(this WaitingLoad load, double ToFloor)
         {
             return Math.Abs(load.FloorNumber - ToFloor);
         }
