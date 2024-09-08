@@ -90,52 +90,6 @@ namespace Machine
         {
             WaitingLoad newLoad = new WaitingLoad() { DestinationFloor = destinationFloor, Load = load, FloorNumber = fromFloor, Type = type };
             _waitingQue.Add(newLoad);
-            
-            //find the closest elevator and move it
-            List<Elevator> availableElevators;
-
-            enStatus direction = enStatus.Idle;
-
-            switch (type)
-            {
-                case enElivatorType.Glass:
-                    availableElevators = _elevators.Where(ev => ev.GetType() == typeof(GlassElevator)).ToList();
-                    break;
-                case enElivatorType.Service:
-                    availableElevators = _elevators.Where(ev => ev.GetType() == typeof(ServiceElevator)).ToList();
-                    break;
-                default:
-                    availableElevators = _elevators.Where(ev =>  ev.GetType() == typeof(StandardElevator)).ToList();
-                    break;
-            }
-            availableElevators = availableElevators.OrderBy(a => a.Distance(fromFloor)).ToList();//.FirstOrDefault();
-
-            //var closestElevator = availableElevators.Where(ev => ev.Direction == direction || ev.Direction == enStatus.Idle).OrderBy(ev => ev.Distance(fromFloor)).FirstOrDefault();
-
-            foreach(var elevator in availableElevators)
-            {
-                //enStatus direction = enStatus.Idle;
-                if (elevator.Floor>fromFloor)
-                {
-                    //move elevlator down
-                    direction = enStatus.MovingDown;
-                }
-                else if (elevator.Floor < fromFloor)
-                {
-                    //moe elevator up
-                    direction=enStatus.MovingUp;
-                }
-
-                if (direction != enStatus.Idle)
-                {
-                    if (elevator.Direction == direction || elevator.Direction == enStatus.Idle)
-                    {
-                        //use this elevator 
-                        elevator.Direction = direction;
-                        break;
-                    }
-                }
-            }
         }
 
         public async Task Start(int noOfFloors = 5, int noOfBAsements = 0)

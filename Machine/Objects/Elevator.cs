@@ -78,7 +78,9 @@ namespace Machine.Objects
         {
             if (Direction == enStatus.Idle)
             {
-                if (waitingLoads.Any())
+                var thisType = this.GetType().ToString();
+
+                if (waitingLoads.Where(a=>thisType.Contains(a.Type.ToString())).Any())
                 {
                     //move the elevator to the first item
                     var firstWaiting = waitingLoads.First();
@@ -116,6 +118,11 @@ namespace Machine.Objects
                         args.TimeReached = DateTime.Now;
                         OnMoveMentEvent(args);
                         await Task.Delay(100);
+                        if (Load <= 0)
+                        {
+                            Load = 0;
+                            break;
+                        }
                     }
 
                     Loads.Remove(load);
@@ -124,16 +131,17 @@ namespace Machine.Objects
             if (Loads.Count != 0)
                 Direction = lastDirection;
 
+            var thisType = this.GetType().ToString();
 
             //now load
             foreach (WaitingLoad waiting in waitingLoads.ToList())
             {
                 //if (Direction == enStatus.Idle || Direction == waiting.Direction)
                 {
-                    if (waiting.FloorNumber == Floor && (Direction == enStatus.Idle || Direction == waiting.Direction || !Loads.Any()) )
+                    if (thisType.Contains(waiting.Type.ToString()) && waiting.FloorNumber == Floor && (Direction == enStatus.Idle || Direction == waiting.Direction || !Loads.Any()) )
                     {
-                        waitingLoads.Remove(waiting);   
-
+                        waitingLoads.Remove(waiting);
+                        Direction=enStatus.Idle;
                         //load
                         ElevatorLoad newLoad = new ElevatorLoad();
                         newLoad.DestinationFloor = waiting.DestinationFloor;

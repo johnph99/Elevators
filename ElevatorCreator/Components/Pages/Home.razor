@@ -109,14 +109,14 @@
 
         _switchBoard.Start(TopFloor, BaseMentFloors);
 
-        // _switchBoard.RequestElevator(enElivatorType.Glass, 1, 4, 4);
-        // _switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
+        _switchBoard.RequestElevator(enElivatorType.Glass, 1, 4, 4);
+        _switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
 
-        // _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
+        _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
 
-        // _switchBoard.RequestElevator(enElivatorType.Glass, 0, 5, 5);
-        // _switchBoard.RequestElevator(enElivatorType.Service, 0, 4, 14);
-        // _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
+        _switchBoard.RequestElevator(enElivatorType.Glass, 0, 5, 5);
+        _switchBoard.RequestElevator(enElivatorType.Service, 0, 4, 14);
+        _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
         _switchBoard.RequestElevator(enElivatorType.Service, 1, 2, 16);
 
         InvokeAsync(StateHasChanged);
