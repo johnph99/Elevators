@@ -27,7 +27,6 @@
             <MudTh>Floor</MudTh>
             <MudTh>Load</MudTh>
             <MudTh>Status</MudTh>
-            <MudTh>Total Load</MudTh>
             <MudTh>Destination Floor</MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -36,7 +35,6 @@
             <MudTd DataLabel="Floor">@context.Floor</MudTd>
             <MudTd DataLabel="Load">@context.Load</MudTd>
             <MudTd DataLabel="Status">@context.Direction.ToString()</MudTd>
-            <MudTd DataLabel="Load">@context.Loads.FirstOrDefault()?.Load</MudTd>
             <MudTd DataLabel="DestinationFloor">@context.Loads.FirstOrDefault()?.DestinationFloor</MudTd>
         </RowTemplate>
   
@@ -100,11 +98,11 @@
 
         _switchBoard.ElevatorMoved += SwitchBoard_ElevatorMoved;
 
-        //  _switchBoard.AddAlivator(enElivatorType.Service);
-        // _switchBoard.AddAlivator(enElivatorType.Glass);
-        // _switchBoard.AddAlivator(enElivatorType.Glass);
+         _switchBoard.AddAlivator(enElivatorType.Service);
+        _switchBoard.AddAlivator(enElivatorType.Glass);
+        _switchBoard.AddAlivator(enElivatorType.Glass);
          _switchBoard.AddAlivator(enElivatorType.Standard);
-         //_switchBoard.AddAlivator(enElivatorType.Standard);
+         _switchBoard.AddAlivator(enElivatorType.Standard);
 
         if (BaseMentFloors < 0)
             BaseMentFloors -= Math.Abs(BaseMentFloors);
@@ -112,13 +110,14 @@
         _switchBoard.Start(TopFloor, BaseMentFloors);
 
         // _switchBoard.RequestElevator(enElivatorType.Glass, 1, 4, 4);
-        //_switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
+        // _switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
 
-        _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
+        // _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
 
         // _switchBoard.RequestElevator(enElivatorType.Glass, 0, 5, 5);
         // _switchBoard.RequestElevator(enElivatorType.Service, 0, 4, 14);
-        _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
+        // _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
+        _switchBoard.RequestElevator(enElivatorType.Service, 1, 2, 16);
 
         InvokeAsync(StateHasChanged);
         //StateHasChanged();
