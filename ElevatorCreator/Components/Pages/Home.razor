@@ -35,7 +35,7 @@
             <MudTd DataLabel="Capacity">@context.Capacity</MudTd>
             <MudTd DataLabel="Floor">@context.Floor</MudTd>
             <MudTd DataLabel="Load">@context.Load</MudTd>
-            <MudTd DataLabel="Status">@context.Status.ToString()</MudTd>
+            <MudTd DataLabel="Status">@context.Direction.ToString()</MudTd>
             <MudTd DataLabel="Load">@context.Loads.FirstOrDefault()?.Load</MudTd>
             <MudTd DataLabel="DestinationFloor">@context.Loads.FirstOrDefault()?.DestinationFloor</MudTd>
         </RowTemplate>

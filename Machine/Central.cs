@@ -42,276 +42,18 @@ namespace Machine
             //move elevators
             foreach (var elevator in _elevators)
             {
-                await MoveElevator(elevator);
-                //wait 1/10 seconds
+                elevator.Move();
+                elevator.LoadUnload(WaitQue);
                 await Task.Delay(500 / _elevators.Count);
             }
 
         }
 
-        private async Task MoveElevator(Elevator elevator)
+        void Elevator_ElevatorMoved(Object sender, ElevatorEventArgs e)
         {
-            //move the elevator
-
-            if (elevator.Status == enStatus.MovingUp)
-            {
-                elevator.Floor += 0.1;
-            }
-            else if (elevator.Status == enStatus.MovingDown)
-            {
-                elevator.Floor -= 0.1;
-            }
-            elevator.Floor = Math.Round(elevator.Floor, 1);
-            await Task.Delay(100);
-
-            //find the closest call for the current elevator
-            WaitingLoad waiting = null;
-            
-            if(elevator.GetType()== typeof(GlassElevator))
-            {
-                waiting = _waitingQue.FirstOrDefault(a => (a.Direction == elevator.Status || elevator.Status == enStatus.Idle) && a.Type==enElivatorType.Glass);
-            }
-            else if (elevator.GetType() == typeof(ServiceElevator))
-            {
-                waiting = _waitingQue.FirstOrDefault(a => (a.Direction == elevator.Status || elevator.Status == enStatus.Idle) && a.Type == enElivatorType.Service);
-            }
-            else
-            {
-                waiting = _waitingQue.FirstOrDefault(a => (a.Direction == elevator.Status || elevator.Status == enStatus.Idle) && a.Type == enElivatorType.Standard);
-            }
-
-            //check if there are elivators that are closer to the floor
-            if (waiting != null)
-            {
-                Elevator closestElevator = null;
-                List<Elevator> availableElevators = null;
-                switch (waiting.Type)
-                {
-                    case enElivatorType.Glass:
-                        availableElevators = _elevators.Where(ev => (ev.Status == waiting.Direction || ev.Status == enStatus.Idle) && ev.GetType() == typeof(GlassElevator)).ToList();
-                        break;
-                    case enElivatorType.Service:
-                        availableElevators = _elevators.Where(ev => (ev.Status == waiting.Direction || ev.Status == enStatus.Idle) && ev.GetType() == typeof(ServiceElevator)).ToList();
-                        break;
-                    default:
-                        availableElevators = _elevators.Where(ev => (ev.Status == waiting.Direction || ev.Status == enStatus.Idle) && ev.GetType() == typeof(StandardElevator)).ToList();
-                        break;
-                }
-                closestElevator = availableElevators.OrderBy(a=>a.Distance(waiting.FloorNumber)).FirstOrDefault();
-
-                if (closestElevator != null && closestElevator.Name != elevator.Name)
-                {
-                    //if there is then just keep moving this elevator
-                    //first check if we should unload
-                    //check if we should unload before loading
-                    if (elevator.Floor == elevator.nextStop)
-                    {
-                        var offload = elevator.Loads.FirstOrDefault(a => a.DestinationFloor == elevator.Floor);
-                        if (offload != null)
-                        {
-                            //offload
-                            await OffLoadElevator(elevator, offload);
-                        }
-                    }
-                }
-                else
-                {
-                    // else add this floor to the elevator if not already added.
-                    //if (waiting != null)
-                    //{
-                    //    elevator.nextStop = waiting.FloorNumber;
-                    //}
-                    //now check if the elevator is on the floor
-                    if (elevator.Floor == elevator.nextStop)
-                    {
-                        //stop and load / unload
-                        elevator.Status = enStatus.Idle;
-
-                        //check if we should unload before loading
-                        var offload = elevator.Loads.FirstOrDefault(a => a.DestinationFloor == elevator.Floor);
-
-                        if (offload != null)
-                        {
-                            //offload
-                            await OffLoadElevator(elevator, offload);
-                            elevator.nextStop = waiting.FloorNumber;
-                            return;
-                        }
-
-                        //if loading then start moving the elevator again.
-                        //load the elevator
-                        if (waiting != null)
-                        {
-                           
-                            var remainingLoad = await SendElevator(elevator, waiting);
-                            _waitingQue.Remove(waiting);
-                            if (remainingLoad > 0)
-                            {
-                                RequestElevator(waiting.Type, waiting.FloorNumber, waiting.DestinationFloor, remainingLoad);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //if not keep moving
-                        if (elevator.Status == enStatus.Idle) 
-                        {
-                            if (elevator.Floor < elevator.nextStop)
-                                elevator.Status = enStatus.MovingUp;
-                            else if (elevator.Floor>elevator.nextStop)
-                                elevator.Status= enStatus.MovingDown;
-
-                        } 
-                    }
-                }
-            }
-            else if (elevator.Floor == elevator.nextStop)
-            {
-                //should we offload?
-                var offload = elevator.Loads.FirstOrDefault(a => a.DestinationFloor == elevator.Floor);
-                    //offload
-                    await OffLoadElevator(elevator, offload);
-                //load the elevator
-
-            }
-            else
-            {
-                Debug.WriteLine(elevator.Floor);
-                Debug.WriteLine(elevator.nextStop);
-            }
-            
-            if (elevator.Status == enStatus.Idle)
-            {
-                if (elevator.Loads.Any())
-                {
-                    if(elevator.Loads.FirstOrDefault().DestinationFloor>elevator.Floor)
-                        elevator.Status =enStatus.MovingDown;
-                    else if(elevator.Loads.FirstOrDefault().DestinationFloor < elevator.Floor)
-                        elevator.Status=enStatus.MovingUp;
-                }
-            }
-
-            
             //raise event
-            ElevatorEventArgs args = new();
-            args.Elevator = elevator;
-            args.TimeReached = DateTime.Now;
-            OnMoveMentEvent(args);
 
-            await Task.Delay(100);
-        }
-
-        private async Task OffLoadElevator(Elevator elevator, ElevatorLoad offload)
-        {
-            var direction = elevator.Status;
-
-            elevator.Status = enStatus.Idle;
-            await Task.Delay(100);
-            if (offload != null)
-            {
-                for (var i = 0; i < offload.Load; i++)
-                {
-                    elevator.Load -= 1;
-                    //raise event
-                    ElevatorEventArgs args = new();
-                    args.Elevator = elevator;
-                    args.TimeReached = DateTime.Now;
-                    OnMoveMentEvent(args);
-                    await Task.Delay(100);
-                }
-
-                elevator.Loads.Remove(offload);
-            }
-            if (elevator.Loads.Any())
-                elevator.Status = direction;
-        }
-
-        private async Task<int> SendElevator(Elevator elevator, WaitingLoad waiting)
-        {
-            int actualLoad = 0;
-            int remaingLoad = 0;
-
-            if (elevator.Floor == waiting.FloorNumber)
-            {
-                var availableSpace = elevator.Capacity - elevator.Load;
-
-                actualLoad = waiting.Load;
-                if (availableSpace > waiting.Load)
-                {
-                    for (var i = 0; i < waiting.Load; i++)
-                    {
-                        elevator.Load += 1;
-                        //raise event
-                        ElevatorEventArgs args = new();
-                        args.Elevator = elevator;
-                        args.TimeReached = DateTime.Now;
-                        OnMoveMentEvent(args);
-                        await Task.Delay(100);
-                    }
-                }
-                else
-                {
-                    actualLoad = availableSpace;
-                    remaingLoad = waiting.Load - actualLoad;
-                    elevator.Load = actualLoad;
-                }
-
-                //to send the elevator, call it from the desitnation floor
-                ElevatorLoad destFloor = new ElevatorLoad();
-                destFloor.Load = actualLoad;
-                destFloor.DestinationFloor = waiting.DestinationFloor;
-                elevator.Loads.Add(destFloor);
-                elevator.Status = waiting.Direction;
-                elevator.nextStop = waiting.DestinationFloor;
-            }
-            else
-            {
-                //to send the elevator, call it from the desitnation floor
-                ElevatorLoad destFloor = new ElevatorLoad();
-                destFloor.Load = actualLoad;
-                destFloor.DestinationFloor = waiting.FloorNumber;
-                elevator.Loads.Add(destFloor);
-                if(destFloor.DestinationFloor>elevator.Floor)
-                    elevator.Status = enStatus.MovingUp;
-                else if (destFloor.DestinationFloor<elevator.Floor)
-                    elevator.Status= enStatus.MovingDown;
-                
-                elevator.nextStop = waiting.FloorNumber;
-
-                remaingLoad = waiting.Load;
-            }
-
-            return remaingLoad;
-        }
-
-        private void CallElevator(Elevator elevator, WaitingLoad forload )
-        {
-            var newStop = new ElevatorLoad() { Load = 0, DestinationFloor=forload.FloorNumber };
-            
-
-            ElevatorLoad nextfloor;
-            if (forload.Direction==enStatus.MovingUp)
-            {
-                //move up
-                nextfloor = elevator.Loads.FirstOrDefault(a => a.DestinationFloor > forload.DestinationFloor);
-                //elevator.Status = enStatus.MovingUp;
-            }
-            else
-            {
-                //movedown
-                nextfloor = elevator.Loads.FirstOrDefault(a => a.DestinationFloor < forload.DestinationFloor);
-                //elevator.Status = enStatus.MovingDown;
-            }
-            if (nextfloor == null)
-            {
-                elevator.Loads.Add(newStop);
-            }
-            else
-            {
-                int index = elevator.Loads.IndexOf(nextfloor);
-                elevator.Loads.Insert(index - 1, newStop);
-            }
-            
+            OnMoveMentEvent(e);
         }
 
         ////
@@ -334,6 +76,9 @@ namespace Machine
                     break;
 
             }
+
+            newElevator.ElevatorMoved += Elevator_ElevatorMoved;
+
             _elevators.Add(newElevator);
             //return newElevator;
         }
@@ -342,6 +87,8 @@ namespace Machine
         {
             WaitingLoad newLoad = new WaitingLoad() { DestinationFloor = destinationFloor, Load = load, FloorNumber = currentFloor, Type = type };
             _waitingQue.Add(newLoad);
+            //find the closest elevator and move it
+            _elevators.Where
         }
 
         public async Task Start(int noOfFloors = 5, int noOfBAsements = 0)
