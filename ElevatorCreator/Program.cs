@@ -1,5 +1,7 @@
 using ElevatorCreator.Components;
 using ElevatorCreator.Managers;
+using Machine;
+using Machine.Interfaces;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +11,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 //builder.Services.AddScoped<SwitchBoard.IControl, SwitchBoard.Control>();
-builder.Services.AddScoped<ControlManager>();
+builder.Services.AddScoped<ICentral, Central>();
 
 builder.Services.AddMudServices();
 

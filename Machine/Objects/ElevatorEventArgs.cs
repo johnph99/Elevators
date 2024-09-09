@@ -7,5 +7,6 @@ namespace Machine.Objects
         public DateTime TimeReached { get; set; }
     }
 
-  
+    public delegate void ElevatorEventHandler(Object sender, ElevatorEventArgs e);
+
 }

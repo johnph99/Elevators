@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elevators", "Elevators\Elevators.csproj", "{68A00EE2-5FB1-4BF6-8567-B851CBEB9A54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElevatorsConsole", "Elevators\ElevatorsConsole.csproj", "{68A00EE2-5FB1-4BF6-8567-B851CBEB9A54}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElevatorCreator", "ElevatorCreator\ElevatorCreator.csproj", "{E1494CD1-FC52-4356-BDB4-30DBCF8BAA15}"
 EndProject

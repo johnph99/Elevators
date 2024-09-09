@@ -1,18 +1,21 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
+@using Machine.Interfaces
 @using MudBlazor.Interfaces
 @using Machine
 @using Machine.Objects
 @using ElevatorCreator.Managers
 @using MudBlazor
 
+@inject ICentral _switchBoard
+
 <MudPopoverProvider />
 
 <PageTitle>Home</PageTitle>
-<MudTextField Value="@Running"></MudTextField>
+<MudTextField Value="@_switchBoard.Running"></MudTextField>
 
-@if (!Running)
+@if (!_switchBoard.Running)
 {
     <button class="btn btn-primary" @onclick="StartAll">Start</button>
 }
@@ -60,7 +63,7 @@
     </MudTable>
 
 }
-@if (Running)
+@if (_switchBoard.Running)
 {
     <MudItem>
         <MudSelect T="Int32"  @bind-Value="newLoadType" Label="Type">
@@ -73,7 +76,7 @@
     <MudTextField @bind-Value="newLoad.DestinationFloor" Label="To Floor"></MudTextField>
     <MudTextField @bind-Value="newLoad.Load" Label="Load"></MudTextField>
 
-    <MudButton OnClick="CallElivator">Call Elivator</MudButton>
+    <MudButton OnClick="CallElevator">Call Elevator</MudButton>
     </MudItem>
 }
 
@@ -85,53 +88,50 @@
     private WaitingLoad newLoad = new();
     private int newLoadType = 0;
 
-    private Central _switchBoard;
+    // private Central _switchBoard;
 
-    private bool Running = false;
     private async void StartAll()
     {
-        Running = true;
         InvokeAsync(StateHasChanged);
-        //StateHasChanged();
 
         _switchBoard = new Central();
 
         _switchBoard.ElevatorMoved += SwitchBoard_ElevatorMoved;
 
-         _switchBoard.AddAlivator(enElivatorType.Service);
-        _switchBoard.AddAlivator(enElivatorType.Glass);
-        _switchBoard.AddAlivator(enElivatorType.Glass);
-         _switchBoard.AddAlivator(enElivatorType.Standard);
-         _switchBoard.AddAlivator(enElivatorType.Standard);
+        _switchBoard.AddAlivator(enElevatorType.Service);
+        _switchBoard.AddAlivator(enElevatorType.Glass);
+        _switchBoard.AddAlivator(enElevatorType.Glass);
+        _switchBoard.AddAlivator(enElevatorType.Standard);
+        _switchBoard.AddAlivator(enElevatorType.Standard);
 
         if (BaseMentFloors < 0)
             BaseMentFloors -= Math.Abs(BaseMentFloors);
 
         _switchBoard.Start(TopFloor, BaseMentFloors);
 
-        _switchBoard.RequestElevator(enElivatorType.Glass, 1, 4, 4);
-        _switchBoard.RequestElevator(enElivatorType.Standard, 2, 3, 6);
+        _switchBoard.RequestElevator(enElevatorType.Glass, 1, 4, 4);
+        _switchBoard.RequestElevator(enElevatorType.Standard, 2, 3, 6);
 
-        _switchBoard.RequestElevator(enElivatorType.Standard, 3, 0, 11);
+        _switchBoard.RequestElevator(enElevatorType.Standard, 3, 0, 11);
 
-        _switchBoard.RequestElevator(enElivatorType.Glass, 0, 5, 5);
-        _switchBoard.RequestElevator(enElivatorType.Service, 0, 4, 14);
-        _switchBoard.RequestElevator(enElivatorType.Standard, 1, 5, 2);
-        _switchBoard.RequestElevator(enElivatorType.Service, 1, 2, 16);
+        _switchBoard.RequestElevator(enElevatorType.Glass, 0, 5, 5);
+        _switchBoard.RequestElevator(enElevatorType.Service, 0, 4, 14);
+        _switchBoard.RequestElevator(enElevatorType.Standard, 1, 5, 2);
+        _switchBoard.RequestElevator(enElevatorType.Service, 1, 2, 16);
 
         InvokeAsync(StateHasChanged);
-        //StateHasChanged();
 
+        _switchBoard.Elevators[0].Stop();
 
     }
 
-    private void CallElivator()
+    private void CallElevator()
     {
-        enElivatorType evt = enElivatorType.Standard;
+        enElevatorType evt = enElevatorType.Standard;
         if (newLoadType == 1)
-            evt = enElivatorType.Glass;
+            evt = enElevatorType.Glass;
         else if (newLoadType == 2)
-            evt = enElivatorType.Service;
+            evt = enElevatorType.Service;
 
         _switchBoard.RequestElevator(evt, newLoad.FloorNumber, newLoad.DestinationFloor, newLoad.Load);
     }
@@ -139,7 +139,7 @@
     {
         //update the page
         //e.Elevator
-        // var currentEleivator = elivators.First(a => a.Name == e.Elevator.Name);
+        // var currentEleivator = Elevators.First(a => a.Name == e.Elevator.Name);
         // currentEleivator.Status = e.Elevator.Status;
         // currentEleivator.Floor = e.Elevator.Floor;
         // currentEleivator.Load = e.Elevator.Load;
