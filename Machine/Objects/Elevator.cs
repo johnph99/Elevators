@@ -73,7 +73,6 @@ namespace Machine.Objects
             //}
         }
 
-
         public async void FindNextLoad(List<WaitingLoad> waitingLoads)
         {
             if (Direction == enStatus.Idle)
@@ -194,6 +193,16 @@ namespace Machine.Objects
         public virtual void OnMoveMentEvent(ElevatorEventArgs e)
         {
             ElevatorMoved?.Invoke(this, e);
+        }
+
+        internal void Stop()
+        {
+            Direction = enStatus.OutOfOrder;
+        }
+
+        internal void Start()
+        {
+            Direction = enStatus.Idle;
         }
     }
 }

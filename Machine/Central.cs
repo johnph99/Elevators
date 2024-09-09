@@ -33,35 +33,21 @@ namespace Machine
             while (_enabled)
             {
                 //move the elevators
-                await MoveElevators();
-                await Task.Delay(500);
+                foreach (var elevator in _elevators)
+                {
+                    //var elType = elevator.GetType().ToString();
+
+                    //var que = WaitQue.Where(a => elType.Contains(a.Type.ToString())).ToList();
+                    elevator.FindNextLoad(WaitQue);
+                    elevator.Move();
+                    elevator.LoadUnload(WaitQue);
+                    await Task.Delay(500 / _elevators.Count);
+
+                }
+               // await Task.Delay(500);
             }
         }
-
-        private async Task MoveElevators()
-        {
-            //move elevators
-            foreach (var elevator in _elevators)
-            {
-                //var elType = elevator.GetType().ToString();
-
-                //var que = WaitQue.Where(a => elType.Contains(a.Type.ToString())).ToList();
-                elevator.FindNextLoad(WaitQue);
-                elevator.Move();
-                elevator.LoadUnload(WaitQue);
-                await Task.Delay(500 / _elevators.Count);
-
-            }
-
-        }
-
-        void Elevator_ElevatorMoved(Object sender, ElevatorEventArgs e)
-        {
-            //raise event
-
-            OnMoveMentEvent(e);
-        }
-
+     
         ////
         /// Public Methods
         /// 
@@ -111,6 +97,16 @@ namespace Machine
             _enabled = false;
         }
 
+        public void StartElevator(Elevator elevator)
+        {
+            elevator.Stop();
+        }
+
+        public void StopElevator(Elevator elevator)
+        {
+            elevator.Start();
+        }
+
 
         /////////////////////////
         ///EVENTS
@@ -119,9 +115,19 @@ namespace Machine
         public delegate void ElevatorEventHandler(Object sender, ElevatorEventArgs e);
 
         public event ElevatorEventHandler ElevatorMoved;
+
         public virtual void OnMoveMentEvent(ElevatorEventArgs e)
         {
             ElevatorMoved?.Invoke(this, e);
         }
+
+        private void Elevator_ElevatorMoved(Object sender, ElevatorEventArgs e)
+        {
+            //raise event
+
+            OnMoveMentEvent(e);
+        }
+
+
     }
 }
