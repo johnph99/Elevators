@@ -5,7 +5,6 @@
 @using MudBlazor.Interfaces
 @using Machine
 @using Machine.Objects
-@using ElevatorCreator.Managers
 @using MudBlazor
 
 @inject ICentral _switchBoard
@@ -65,6 +64,7 @@
 }
 @if (_switchBoard.Running)
 {
+    <h2>CALL ELIVATOR</h2>
     <MudItem>
         <MudSelect T="Int32"  @bind-Value="newLoadType" Label="Type">
             <MudSelectItem Value="0" >Standard</MudSelectItem>
