@@ -52,10 +52,13 @@ namespace Machine
                     {
                         try
                         {
-                            elevator.FindNextLoad(WaitQue);
-                            elevator.Move();
-                            elevator.LoadUnload(WaitQue);
-                            await Task.Delay(500 / _elevators.Count);
+                            if (elevator != null)
+                            {
+                                elevator.FindNextLoad(WaitQue);
+                                elevator.Move();
+                                elevator.LoadUnload(WaitQue);
+                                await Task.Delay(500 / _elevators.Count);
+                            }
                         }
                         catch
                         {
