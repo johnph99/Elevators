@@ -13,6 +13,7 @@ var StandardCount = AnsiConsole.Prompt(new TextPrompt<int>("How many standard el
 var GlassCount = AnsiConsole.Prompt(new TextPrompt<int>("How many glass elevators in the building?"));
 var serviceCount = AnsiConsole.Prompt(new TextPrompt<int>("How many service elevators in the building?"));
 
+
 ICentral Controller = new Central();
 
 for (int i = 0; i < StandardCount; i++)
@@ -35,17 +36,7 @@ Building.PrintDetails(floors + Math.Abs(basments), StandardCount, GlassCount, se
 Runner runner = new();
 runner.Run(Controller, floors, basments);
 
-Console.CancelKeyPress += new ConsoleCancelEventHandler(myHandler);
-
-
-
-Controller.RequestElevator(enElevatorType.Glass, 1, 3, 5);
+//Controller.RequestElevator(enElevatorType.Glass, 1, 3, 5);
 
 Console.ReadLine();
 
-void myHandler(object sender, ConsoleCancelEventArgs args)
-{
-
-    args.Cancel = true;
-    LoadRequestor.RequestElevator(Controller);
-}

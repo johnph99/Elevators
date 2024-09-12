@@ -11,25 +11,30 @@ namespace ElevatorsConsole
 {
     public static class LoadRequestor
     {
-        public static void RequestElevator(ICentral controller)
+        public static string RequestElevator(ICentral controller)
         {
+            string retval = "";
+
             AnsiConsole.AlternateScreen(() =>
             {
+
                 // Now we're in another terminal screen buffer
                 AnsiConsole.Write(new Rule("[red]Request Elevator[/]"));
                 WriteDivider("Elevator Type");
                 var typ = AskType();
                 WriteDivider("From Floor");
-                int fromFloor = AskFloor("load", controller.Elevators[0].BottomFloor,controller.Elevators[0].TopFloor);
+                int fromFloor = GetInput("load", controller.Elevators[0].BottomFloor, controller.Elevators[0].TopFloor);
                 WriteDivider("To Floor");
-                int toFloor = AskFloor("load", controller.Elevators[0].BottomFloor, controller.Elevators[0].TopFloor);
-                WriteDivider("To Floor");
+                int toFloor = GetInput("offload", controller.Elevators[0].BottomFloor, controller.Elevators[0].TopFloor);
+                WriteDivider("Load");
                 int load = AskLoad();
-
-
+                
                 controller.RequestElevator(typ, fromFloor, toFloor, load);
 
+                retval= $"Type: {typ.ToString()}, From Floor: {fromFloor}, To Floor: {toFloor}, Load: {load}";
             });
+
+            return retval;
         }
 
         private static int AskLoad()
@@ -51,7 +56,7 @@ namespace ElevatorsConsole
 
         }
 
-        private static int AskFloor(string stop, int bottomFloor, int topFloor)
+        private static int GetInput(string stop, int bottomFloor, int topFloor)
         {
             if (stop == "load")
                 stop = "What is the loading floor number?";
@@ -69,7 +74,7 @@ namespace ElevatorsConsole
 
         }
 
-        private static void WriteDivider(string text)
+        public static void WriteDivider(string text)
         {
             AnsiConsole.WriteLine();
             AnsiConsole.Write(new Rule($"[yellow]{text}[/]").RuleStyle("grey").LeftJustified());

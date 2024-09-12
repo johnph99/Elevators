@@ -13,6 +13,8 @@ namespace ElevatorsConsole
 
             controller.Start(floors, basements);
 
+            //_ = Task.Run(() => ListenForKeyboardInput(controller));
+
             var table = new Table().Expand().BorderColor(Color.Grey);
             table.AddColumn("[yellow]Name[/]");
             table.AddColumn("[yellow]Capacity[/]");
@@ -20,16 +22,25 @@ namespace ElevatorsConsole
             table.AddColumn("[yellow]Load[/]");
             table.AddColumn("[yellow]Status[/]");
 
+            bool addmore = true;
+            while (addmore)
+            {
+                string callDesc = LoadRequestor.RequestElevator(controller);
+                AnsiConsole.WriteLine(callDesc);
+
+                addmore = AnsiConsole.Confirm("Do you want to add another elevator call?");
+            }
+            
             AnsiConsole.MarkupLine("Press [yellow]CTRL+C[/] to exit");
 
-            await AnsiConsole.Live(table)
+            _ = AnsiConsole.Live(table)
                 .AutoClear(false)
                 .Overflow(VerticalOverflow.Ellipsis)
                 .Cropping(VerticalOverflowCropping.Bottom)
                 .StartAsync(async ctx =>
                 {
                     // Add some initial rows
-                    foreach (Elevator elevator in  controller.Elevators)
+                    foreach (Elevator elevator in controller.Elevators)
                     {
                         AddElevatorRow(table, elevator);
                     }
@@ -37,7 +48,7 @@ namespace ElevatorsConsole
                     // Continously update the table
                     while (true)
                     {
-                        int x = 0; 
+                        int x = 0;
                         foreach (Elevator elevator in controller.Elevators)
                         {
                             table.Rows.RemoveAt(0);
@@ -46,30 +57,29 @@ namespace ElevatorsConsole
 
                         //    // Refresh and wait for a while
                         ctx.Refresh();
+
                         await Task.Delay(400);
-                        
-                        CheckKeyPress(controller);
                     }
                 });
         }
 
-        private async void CheckKeyPress(ICentral controller)
-        {
-            //ConsoleKeyInfo key = new ConsoleKeyInfo();
+        //private static async void ListenForKeyboardInput(ICentral controller)
+        //{
+        //    while (true)
+        //    {
+        //        // Read a line from the console  
+        //        var key = Console.ReadKey().Key;
+        //        if (key == ConsoleKey.A)
+        //        {
+        //            Paused = true;
+        //            await Task.Delay(500);
+        //            LoadRequestor.RequestElevator(controller);
+        //            Paused = false;
+        //        }
+        //    }
+        //}
 
-            //if (AnsiConsole.Console.Input.IsKeyAvailable() )
-            
-            if (Console.KeyAvailable)
-            {
-                var keyInfo = Console.ReadKey(true);
-                var key = keyInfo.Key;
-                if (key == ConsoleKey.A)
-                {
-                    LoadRequestor.RequestElevator(controller);
-                }
-            }
-        }
-
+       
         private void AddElevatorRow(Table table, IElevator elevator)
         {
             table.AddRow(elevator.Name, elevator.Capacity.ToString(), elevator.Floor.ToString(),
@@ -81,15 +91,6 @@ namespace ElevatorsConsole
 
         void Controller_ElevatorMoved(Object sender, ElevatorEventArgs e)
         {
-            //update the page
-            //e.Elevator
-            // var currentEleivator = Elevators.First(a => a.Name == e.Elevator.Name);
-            // currentEleivator.Status = e.Elevator.Status;
-            // currentEleivator.Floor = e.Elevator.Floor;
-            // currentEleivator.Load = e.Elevator.Load;
-            ;
-            // StateHasChanged();
-
         }
 
        
