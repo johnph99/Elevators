@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Machine.Objects
 {
-    public enum enElivatorType
+    public enum enElevatorType
     {
         Standard,
         Glass,
